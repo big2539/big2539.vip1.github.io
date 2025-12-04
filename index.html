@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>แชร์ Flex - รับเครดิตฟรี</title>
+
+<!-- LIFF SDK -->
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<style>
+  :root{
+    --gold1:#FFD54F;
+    --gold2:#FFB300;
+    --bg:#040405;
+    --card:#0b0b0b;
+  }
+  html,body{height:100%;margin:0;}
+  body{
+    background: linear-gradient(180deg,#05040a,#0b0b12);
+    color:#fff;
+    font-family: "Prompt", sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .card{
+    width:100%;
+    max-width:460px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:18px;
+    padding:22px;
+    text-align:center;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+    backdrop-filter: blur(6px);
+  }
+
+  .poster{
+    width:100%;
+    border-radius:12px;
+    display:block;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 40px rgba(255,180,30,0.06);
+    border: 6px solid rgba(0,0,0,0.35);
+    object-fit:cover;
+  }
+
+  .title{
+    margin-top:14px;
+    font-size:20px;
+    font-weight:700;
+    color:var(--gold1);
+    text-shadow: 0 2px 8px rgba(255,200,50,0.12);
+  }
+
+  .desc{
+    margin-top:8px;
+    font-size:13px;
+    color: #ddd;
+    opacity:0.95;
+  }
+
+  /* ปุ่มเรืองแสง 3D */
+  .share-btn{
+    margin-top:18px;
+    width:100%;
+    padding:14px 18px;
+    font-size:18px;
+    font-weight:800;
+    color:#140f00;
+    background: linear-gradient(90deg,var(--gold1),var(--gold2));
+    border-radius:14px;
+    border:none;
+    cursor:pointer;
+    box-shadow:
+      0 8px 0 rgba(196,143,0,0.8),
+      0 0 18px rgba(255,208,90,0.35),
+      0 0 36px rgba(255,208,90,0.12);
+    transition: transform .12s ease, box-shadow .12s;
+    transform: translateY(0);
+  }
+  .share-btn:active{ transform: translateY(6px); box-shadow: 0 2px 0 rgba(196,143,0,0.8); }
+
+  .note{ margin-top:12px; font-size:12px; color:#bbb; opacity:0.9; }
+
+  @media (prefers-color-scheme: light){
+    body{ background: linear-gradient(180deg,#fff,#f8f8f8); color:#111 }
+    .card{ background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    .title{ color:#b06a00;}
+    .share-btn{ color:#140f00 }
+  }
+</style>
+</head>
+<body>
+
+<div class="card" role="main">
+  <!-- ใส่ preview ภาพ (local preview) -->
+  <img class="poster" src="https://img5.pic.in.th/file/secure-sv1/eeb66b32-476f-4910-bbdf-d5964ff20818.jpg" alt="โปรโมชั่น แจกเครดิต 100">
+  <div class="title">💸 สมัครรับฟรี 100฿ 💸</div>
+  <div class="desc">กดแชร์ให้เพื่อนหรือกลุ่มใน LINE เพื่อส่งสิทธิ์แบบ Flex</div>
+
+  <button id="shareBtn" class="share-btn" onclick="shareFlex()">✨ กดแชร์ให้เพื่อน/กลุ่ม ✨</button>
+
+  <div class="note">เปิดหน้าเว็บนี้ในแอป LINE (กดจาก LIFF) เพื่อแชร์ — หาก Flex ไม่ขึ้น ให้อ่านหมายเหตุด้านล่าง</div>
+</div>
+
+<script>
+const LIFF_ID = "2008464608-vzDygx4o"; // ใส่ LIFF ID ที่ให้มา
+
+// ฟังก์ชันเตรียม Flex และเรียก shareTargetPicker
+async function shareFlex(){
+  try{
+    // init LIFF (ถ้ายังไม่ init)
+    if (!window.liff) {
+      alert("เกิดข้อผิดพลาด: ไม่พบ LIFF SDK");
+      return;
+    }
+
+    await liff.init({ liffId: LIFF_ID });
+
+    // ตรวจสอบว่าเรียก share target picker ได้หรือไม่
+    if (!liff.isApiAvailable('shareTargetPicker')) {
+      alert("ฟีเจอร์แชร์ต้องเปิดผ่านแอป LINE เท่านั้น (Share Target Picker ไม่พร้อมใช้งาน)");
+      return;
+    }
+
+    // **Flex message** — ปรับให้ขึ้นแน่นอนใน shareTargetPicker (size: mega, hero + ส่วนน้อย)
+    const flexMsg = {
+      type: "flex",
+      altText: "สมัครรับฟรี 100฿ — กดรับสิทธิ์!",
+      contents: {
+        type: "bubble",
+        size: "mega",
+        hero: {
+          type: "image",
+          url: "https://img5.pic.in.th/file/secure-sv1/eeb66b32-476f-4910-bbdf-d5964ff20818.jpg",
+          size: "full",
+          aspectRatio: "1:1.6",     // ปรับสัดส่วนให้เหมาะกับภาพแนวโปสเตอร์
+          aspectMode: "cover",
+          action: { type: "uri", uri: "https://poche88.carrd.co" }
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          paddingAll: "12px",
+          spacing: "sm",
+          backgroundColor: "#0b0b0bcc",
+          contents: [
+            {
+              type: "text",
+              text: "💸 แจกเครดิตฟรี 100฿",
+              weight: "bold",
+              size: "md",
+              color: "#FFD54F",
+              align: "center"
+            },
+            {
+              type: "text",
+              text: "กดปุ่มด้านล่างเพื่อรับสิทธิ์และเข้าเว็บ",
+              size: "xs",
+              color: "#ffffffcc",
+              align: "center",
+              wrap: true,
+              margin: "sm"
+            },
+            {
+              type: "button",
+              style: "primary",
+              color: "#FFD54F",
+              action: {
+                type: "uri",
+                label: "💸สมัครรับฟรี100฿.💸",
+                uri: "https://poche88.carrd.co"
+              },
+              margin: "md"
+            }
+          ]
+        },
+        styles: {
+          hero: { backgroundColor: "#000000" },
+          body: { backgroundColor: "#0b0b0b" }
+        }
+      }
+    };
+
+    // ส่งขึ้น Share Target Picker
+    await liff.shareTargetPicker([flexMsg]);
+
+    // ถ้าอยากแจ้งผู้ใช้ว่าจัดส่งแล้ว ให้ทำต่อที่นี่ (ไม่จำเป็น)
+    // alert("เปิดหน้าต่างเลือกเพื่อน/กลุ่มใน LINE แล้ว");
+  } catch (err){
+    console.error("share error:", err);
+    alert("เกิดข้อผิดพลาดขณะแชร์: " + (err.message || err));
+  }
+}
+</script>
+
+</body>
+</html>
